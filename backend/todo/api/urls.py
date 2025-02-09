@@ -7,5 +7,6 @@ router.register(r'tasks', api_views.TaskViewSet, basename='task')
 
 urlpatterns = [
     path('', include(router.urls)),
+    # path to delete all completed tasks
     path('api/tasks/delete_completed/', api_views.TaskViewSet.as_view({'post': 'delete_completed'}), name='delete_completed_tasks'),
 ]

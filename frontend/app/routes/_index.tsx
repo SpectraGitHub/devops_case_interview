@@ -42,12 +42,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   try {
+    // post request to add task
     await httpPost<Task>(
       "http://localhost:8000/api/todo/tasks/",
       JSON.stringify({ title, due_date: due_date || undefined })
     );
     return redirect("/");
   } catch (error) {
+    // handles server error
     return Response.json({ error: "An unexpected error occurred" }, { status: 500 });
   }
 };
@@ -62,21 +64,32 @@ export const loader = async () => {
 };
 
 export default function Index() {
+
+  // fetches task data from loader
   const { taskData } = useLoaderData<typeof loader>();
+  
+  // fetches error from action
   const actionData = useActionData<DateErrorHandling>();
+
+  // used to store tasks
   const [tasks, setTasks] = useState(taskData);
+
+  // used to display error message
   const [error, setError] = useState(actionData?.error || null);
 
   // sets task as completed
   const setCompleted = async (task: Task, completed: boolean) => {
     try {
+      // patch request to update task
       await httpPatch<Task>(
         `http://localhost:8000/api/todo/tasks/${task.id}/`,
         JSON.stringify({ completed })
       );
+      // updates task list
       task.completed = completed;
       setTasks([...tasks]);
     } catch (error) {
+      // handles error
       console.error("Failed to update task:", error);
     }
   };
@@ -84,6 +97,7 @@ export default function Index() {
   // deletes completed tasks
   const deleteCompletedTasks = async () => {
     try {
+      // post request to delete completed tasks because delete method is not provided
       await httpPost("http://localhost:8000/api/todo/tasks/delete_completed/");
       const updatedTasks = tasks.filter((task) => !task.completed);
       setTasks(updatedTasks);
@@ -177,7 +191,7 @@ export default function Index() {
                   className={`block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 ${error ? 'border-red-500' : 'border-2 border-indigo-600'}`}
                 />
                 <button
-                  type="submit"
+                  type="submit"  // set this to submit so that it was possible to add tasks
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   <svg
